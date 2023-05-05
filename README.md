@@ -34,6 +34,25 @@ Start the package for assignment one in the following way:
     - Modify the behaviour of the watchdog, so the turtle is only able to turn before the start command is sent and stopped completly after the stop command is sent
     - In order to create the desired behaviour you have to set certain components of the 'cmd_vel' topic to zero
 
+---
+Starten Sie das Paket für Aufgabe eins auf folgende Weise:
+- `ros2 launch watchdog watchdog.launch.py` startet den Turtlesim und den Watchdog-Knoten
+- `ros2 run turtlesim turtle_teleop_key` startet den Teleoperationsknoten - damit kannst du die Schildkröte steuern
+    - Benutze die Pfeiltasten, um die Schildkröte zu drehen (die Tasten GVBR etc. benutzen einen anderen Mechanismus, der die Schildkröte steuert, der den Watchdog-Knoten umgeht)
+- Jetzt können Sie das aktuelle Verhalten des Systems mit `rqt` untersuchen
+    - Wir schlagen zwei Plugins vor, die Sie aktivieren können: *introspection - node graph* und *topics - topic monitor*.
+- Sie können sehen, dass der Teleop-Knoten die Schildkröte direkt steuert - das ist nicht das, was wir wollen
+    - Sie können die Ausgabe des Teleop-Knotens in das Eingabethema für das Thema des Watchdog-Knotens umleiten: `ros2 run turtlesim turtle_teleop_key --ros-args --remap turtle1/cmd_vel:=turtle1/input_cmd`
+    - Überprüfen Sie die Änderungen im Knotengraphen (der Teleop-Knoten sollte nun seine Nachrichten an das Thema "turtle1/input_cmd" senden, das vom Watchdog abonniert wurde)
+    - Jetzt sollte sich die Schildkröte rückwärts bewegen
+- Wenn das Verhalten der Schildkröte richtig ist, achten Sie auf den Controller-Knoten
+    - Dieser Knoten veröffentlicht eine Start- und eine Stoppnachricht
+    - Ändern Sie das Verhalten des Watchdogs so, dass sich die Schildkröte nur drehen kann, bevor der Start-Befehl gesendet wird, und dass sie nach dem Stopp-Befehl vollständig anhält
+    - Um das gewünschte Verhalten zu erreichen, müssen Sie bestimmte Komponenten des Topics 'cmd_vel' auf Null setzen
+
+Übersetzt mit www.DeepL.com/Translator (kostenlose Version)
+---
+
 ## Assignment 2: Reactive Behaviour
 
 In this assignment we want to program a reactive behaviour, that controls the robot by directly computing actuator commands from the sensor input. The sensor input we use is the laser scanner of the robot, which publishes to the `scan` topic. The velocity of the robot is controlled via the `cmd_vel` topic.

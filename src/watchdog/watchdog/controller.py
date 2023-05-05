@@ -14,7 +14,7 @@ class ControllerNode(Node):
         self.create_timer(self.period, self.timer_callback)
 
     def timer_callback(self):
-        # self.get_logger().info(f'controller @ {self.period*self.i}s')
+        self.get_logger().info(f'controller @ {self.period*self.i}s')
         if self.i == 2:
             msg = String(data="start")
             self.publisher.publish(msg)
