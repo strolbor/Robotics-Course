@@ -18,7 +18,7 @@ class WatchdogNode(Node):
     def cmd_callback(self, msg):
         # this makes the turle go backwards
         # (just so you know its working)
-        msg.linear.x = -1 * msg.linear.x
+        # msg.linear.x = -1 * msg.linear.x
         
         #if self.data == '' or self.data == 'stop':
         if self.data is None:

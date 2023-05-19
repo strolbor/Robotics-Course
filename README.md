@@ -66,7 +66,10 @@ In this assignment we want to program a reactive behaviour, that controls the ro
 ### Benchmark
 Run your behaviour and note the score after 240s (sim-time)
 - `ros2 launch reactive_behaviour robot.launch.py n_robots:=1`
+- `ros2 launch reactive_behaviour robot.launch.py n_robots:=1 simulator:=gzserver` # ohne 3D Simulation
 - `ros2 launch reactive_behaviour swarmlab.launch.py n_robots:=1`
+
+colcon build --cmake-clean-cache
 
 ## Assignment 3: State Estimation
 

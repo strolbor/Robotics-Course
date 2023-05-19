@@ -9,21 +9,50 @@ class VelocityController(Node):
     def __init__(self):
         super().__init__('velocity_controller')
         self.publisher = self.create_publisher(Twist, 'cmd_vel', 10)
-        self.forward_distance = 0
+        self.ranges = None
         self.create_subscription(LaserScan, 'scan', self.laser_cb, rclpy.qos.qos_profile_sensor_data)
         self.create_timer(0.1, self.timer_cb)
         self.get_logger().info('controller node started')
+        self.data = None
         
+    ##
+    # msg.angular.z da dreht sich der Roboter um die eigene Achse gany wild
+    # msg.angular.y macht nichts
+    #
+    # TODO: auch seitlichen checken
+    # 
+    ##
     def timer_cb(self):
         msg = Twist()
-        x = self.forward_distance - 0.3
-        x = x if x < 0.1 else 0.1
-        x = x if x >= 0 else 0.0
+        x = 0.0
+        anY = 0.0
+        if self.ranges is not None:
+            x = self.ranges[0] - 0.3
+            self.get_logger().info(f'{len(self.ranges)} hat Werte: 0: {self.ranges[0]} 45: {self.ranges[45]} 90: {self.ranges[90]} 135: {self.ranges[135]} 225: {self.ranges[225]} 270: {self.ranges[270]}')
+            anY = 0.0
+            if x < 0.1: # Man kann nicht weiter Vorgehen
+                x = x
+                anY = -0.1
+
+            else: # Kann gradeaus fahren
+                x= 0.1
+
+            
+            if  x >= 0: # Kann grade aus fahren
+                x = x
+
+            else: # Man kann nicht weiter vorgehen
+                x = 0.0
+                anY = -0.1
+
+
         msg.linear.x = x
+        msg.angular.z = anY # bewirkt das der roboter um die eigene achse dreht
         self.publisher.publish(msg)
     
     def laser_cb(self, msg):
-        self.forward_distance = msg.ranges[0]
+        #self.ranges = msg.ranges[0]
+        self.ranges = msg.ranges
 
 
 
