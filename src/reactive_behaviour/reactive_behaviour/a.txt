@@ -1,0 +1,11 @@
+            if  x > 1: # Kann grade aus fahren
+                ex = 0.4
+            elif x <= 1 and x >= 0.5:
+                ex = 0.1
+            if x < 0.5 and self.ranges[90] <= 0.8:
+                ex = 0.1
+                anY = -0.3
+            
+            if x < 0.5 and self.ranges[270] <= 0.8:
+                ex = 0.1
+                anY = 0.3

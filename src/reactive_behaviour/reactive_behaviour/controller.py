@@ -3,6 +3,8 @@ from rclpy.node import Node
 
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
+import random
+
 
 class VelocityController(Node):
 
@@ -16,37 +18,47 @@ class VelocityController(Node):
         self.data = None
         
     ##
-    # msg.angular.z da dreht sich der Roboter um die eigene Achse gany wild
-    # msg.angular.y macht nichts
     #
-    # TODO: auch seitlichen checken
-    # 
+    #                       sensor_oben
+    #   sensor_hinten        ROBOT        sensor_vorne
+    #                       sensor_unten
     ##
     def timer_cb(self):
         msg = Twist()
-        x = 0.0
+        # Variabeln Init
+        sensor_vorne = 0.0
         anY = 0.0
+        ex = 0.0
         if self.ranges is not None:
-            x = self.ranges[0] - 0.3
-            self.get_logger().info(f'{len(self.ranges)} hat Werte: 0: {self.ranges[0]} 45: {self.ranges[45]} 90: {self.ranges[90]} 135: {self.ranges[135]} 225: {self.ranges[225]} 270: {self.ranges[270]}')
-            anY = 0.0
-            if x < 0.1: # Man kann nicht weiter Vorgehen
-                x = x
-                anY = -0.1
-
-            else: # Kann gradeaus fahren
-                x= 0.1
-
+            sensor_vorne = self.ranges[0] - 0.3
+            sensor_oben = self.ranges[90]
+            sensor_hinten = self.ranges[180]
+            sensor_unten = self.ranges[270]
             
-            if  x >= 0: # Kann grade aus fahren
-                x = x
+            #self.get_logger().info(f'0: {self.ranges[0]} 45: {self.ranges[45]} 90: {self.ranges[90]} 135: {self.ranges[135]} 225: {self.ranges[225]} 270: {self.ranges[270]}')
 
-            else: # Man kann nicht weiter vorgehen
-                x = 0.0
-                anY = -0.1
+            # TODO: rogrammieren
+            # Abfrage, das rechts gesperrt ist
+            if  sensor_vorne > 1: # Kann grade aus fahren
+                ex = 0.4 # Wenn weit vorne nichts ist; können wir schnell fahren
+            elif sensor_vorne <= 0.3:
+                # Wenn vorne nicht weiter geht und alles andere ist frei, dann drehe dich trotzdem
+                ex = 0.1
+                anY = -0.3
+                #self.get_logger().info('Option A')
+            else: 
+                ex = 0.2 # Wir sind bald an einer Wand und müssen langsamer fahren
+            if sensor_vorne <= 0.5 and sensor_oben <= 0.5:
+                ex = 0.1
+                anY = -0.4
+                self.get_logger().info('Option B: Sensor vorne und oben melden nah')
+            if sensor_oben <= 0.5:
+                self.get_logger().info('Option C: Sensor oben meldet zu nah')
+                anY = -0.4
+                #anY += random.random()*-1
+            
 
-
-        msg.linear.x = x
+        msg.linear.x = ex
         msg.angular.z = anY # bewirkt das der roboter um die eigene achse dreht
         self.publisher.publish(msg)
     
