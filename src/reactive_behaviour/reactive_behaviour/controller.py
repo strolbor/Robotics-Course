@@ -20,7 +20,7 @@ class VelocityController(Node):
     ##
     #
     #                       sensor_oben
-    #   sensor_hinten        ROBOT        sensor_vorne
+    #   sensor_hinten        ROBOT--->       sensor_vorne  
     #                       sensor_unten
     ##
     def timer_cb(self):
@@ -30,7 +30,7 @@ class VelocityController(Node):
         anY = 0.0
         ex = 0.0
         if self.ranges is not None:
-            sensor_vorne = self.ranges[0] - 0.3
+            sensor_vorne = self.ranges[0]
             sensor_oben = self.ranges[90]
             sensor_hinten = self.ranges[180]
             sensor_unten = self.ranges[270]
@@ -39,9 +39,9 @@ class VelocityController(Node):
 
             # TODO: rogrammieren
             # Abfrage, das rechts gesperrt ist
-            if  sensor_vorne > 1: # Kann grade aus fahren
+            if  sensor_vorne > 1.3: # Kann grade aus fahren
                 ex = 0.4 # Wenn weit vorne nichts ist; können wir schnell fahren
-            elif sensor_vorne <= 0.3:
+            elif sensor_vorne <= 0.6:
                 # Wenn vorne nicht weiter geht und alles andere ist frei, dann drehe dich trotzdem
                 ex = 0.1
                 anY = -0.3
@@ -51,9 +51,9 @@ class VelocityController(Node):
             if sensor_vorne <= 0.5 and sensor_oben <= 0.5:
                 ex = 0.1
                 anY = -0.4
-                self.get_logger().info('Option B: Sensor vorne und oben melden nah')
+                #self.get_logger().info('Option B: Sensor vorne und oben melden nah')
             if sensor_oben <= 0.5:
-                self.get_logger().info('Option C: Sensor oben meldet zu nah')
+                #self.get_logger().info('Option C: Sensor oben meldet zu nah')
                 anY = -0.4
                 #anY += random.random()*-1
             
