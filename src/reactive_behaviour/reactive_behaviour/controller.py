@@ -4,6 +4,14 @@
 # [scoring-13] [INFO] [1684841325.213964539] [robotA.scoring_node]: score: 39.88 at t=240.0s
 #       mit Random
 #
+# ----
+# mehr if unten
+# Score:
+#    [scoring-13] [INFO] [1684914921.764265498] [robotA.scoring_node]: score: 38.2 at t=240.0s
+#    [scoring-13] [INFO] [1684914922.266787270] [robotA.scoring_node]: score: 38.2 at t=240.5s
+#   
+#
+## 
 
 import rclpy
 from rclpy.node import Node
@@ -50,14 +58,14 @@ class VelocityController(Node):
             sensor_unten = self.ranges[270]
             
             # TODO: rogrammieren
-            if sensor_vorne > 1.6:
+            if sensor_vorne > 1.3:
                 #self.get_logger().info('Option A')
                 # Wenn vorne frei ist, fahre schnell gradeaus
                 ex = HIGHSPEED
                 #if random.randint(0,10) <= 4:
                 #    anY = 2*LEFTTURN
                 #    self.get_logger().info('Option RANDOM Integrant')
-            elif sensor_vorne <= 0.3:
+            elif sensor_vorne <= 0.8:
                 # Wir sind nah an der Wand und müssen uns drehen
                 #self.get_logger().info('Option B')
                 if sensor_oben > sensor_unten:
@@ -73,6 +81,10 @@ class VelocityController(Node):
                 else:
                     anY = LEFTTURN       
                 ex = MEDIUMSPEED
+            if sensor_oben <= 0.8 and anY == 0.0:
+                anY = LEFTTURN
+            if sensor_unten <= 0.8 and anY == 0.0:
+                anY = RIGTHTURN
             
 
         msg.linear.x = ex # bewirkt, das der roboter fährt
