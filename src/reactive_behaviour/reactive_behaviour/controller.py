@@ -57,35 +57,25 @@ class VelocityController(Node):
             sensor_hinten = self.ranges[180]
             sensor_unten = self.ranges[270]
             
-            # TODO: rogrammieren
+            # Geschwindigkeit festlegen
             if sensor_vorne > 1.3:
                 #self.get_logger().info('Option A')
                 # Wenn vorne frei ist, fahre schnell gradeaus
                 ex = HIGHSPEED
-                #if random.randint(0,10) <= 4:
-                #    anY = 2*LEFTTURN
-                #    self.get_logger().info('Option RANDOM Integrant')
             elif sensor_vorne <= 0.8:
                 # Wir sind nah an der Wand und müssen uns drehen
                 #self.get_logger().info('Option B')
-                if sensor_oben > sensor_unten:
-                    anY = RIGTHTURN
-                else:
-                    anY = LEFTTURN
                 ex = LOWSPEED
             else:
                 #self.get_logger().info('Option C')
-                # Wir sind noch bisschen von der Wand entfernt, also können wir schneller drehen
-                if sensor_oben > sensor_unten:
-                    anY = RIGTHTURN
-                else:
-                    anY = LEFTTURN       
+                # Wir sind noch bisschen von der Wand entfernt, also können wir schneller drehen 
                 ex = MEDIUMSPEED
-            if sensor_oben <= 0.8 and anY == 0.0:
-                anY = LEFTTURN
-            if sensor_unten <= 0.8 and anY == 0.0:
-                anY = RIGTHTURN
             
+            # Drehung festlegen
+            if sensor_oben > sensor_unten:
+                anY = RIGTHTURN
+            else:
+                anY = LEFTTURN      
 
         msg.linear.x = ex # bewirkt, das der roboter fährt
         msg.angular.z = anY # bewirkt das der roboter um die eigene achse dreht
