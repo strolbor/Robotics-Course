@@ -34,11 +34,24 @@ class LocatorNode(Node):
     
     def calculate_position(self):
         if not len(self.anchor_ranges):
+            self.get_logger().info("0-Rückgabe")
             return 0.0, 0.0, 0.0
         
-        # YOUR CODE GOES HERE:
-        x = np.mean([r.range for r in self.anchor_ranges]) - 0.5
-        return x, 0.0, 0.0
+        # Extrahiere die Entfernungen der Ankerpunkte aus den empfangenen Nachrichten
+        anchor_distances = [msg.range for msg in self.anchor_ranges]
+        
+        # Triangulationsalgorithmus zur Positionsschätzung
+        # Hier ein einfaches Beispiel für eine 2D-Positionsschätzung mit 4 Ankerpunkten:
+        # Annahme: Ankerpunkte befinden sich auf den Koordinaten (0, 0), (1, 0), (0, 1), (1, 1)
+        
+        # Berechne die Durchschnittsentfernung zu den Ankerpunkten
+        mean_distance = np.mean(anchor_distances)
+        
+        # Berechne die Schätzung der x- und y-Koordinate des Roboters
+        x = np.sqrt(mean_distance**2 / 2)  # Beispiel für x-Koordinate
+        y = np.sqrt(mean_distance**2 / 2)  # Beispiel für y-Koordinate
+        self.get_logger().info(f'Locator: {x} {y}')
+        return x, y, 0.0  # Z-Koordinate ist hier 0, da es sich um eine 2D-Position handelt
 
 
 def main(args=None):

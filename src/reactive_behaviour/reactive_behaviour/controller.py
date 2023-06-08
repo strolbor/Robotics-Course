@@ -10,7 +10,9 @@
 #    [scoring-13] [INFO] [1684914921.764265498] [robotA.scoring_node]: score: 38.2 at t=240.0s
 #    [scoring-13] [INFO] [1684914922.266787270] [robotA.scoring_node]: score: 38.2 at t=240.5s
 #   
+# Gruppe: Rom Herzberg, Florian Dahlke, Laurel Raven, Urs Braun
 #
+# Heute: [scoring-13] [INFO] [1685092810.051578054] [robotA.scoring_node]: score: 35.17 at t=240.0s
 ## 
 
 import rclpy
@@ -49,7 +51,7 @@ class VelocityController(Node):
             ##
             #
             #                       sensor_oben
-            #   sensor_hinten        ROBOT--->       sensor_vorne  
+            #   sensor_hinten        ROBOT--->       sensor_vorn
             #                       sensor_unten
             ##
             sensor_vorne = self.ranges[0]
@@ -82,7 +84,12 @@ class VelocityController(Node):
         self.publisher.publish(msg)
     
     def laser_cb(self, msg):
+        r = msg.ranges
+        r = [x if x>= msg.range_min and x < msg.range_max else 10.0 for x in r]
+        self.forward_distance = min(r[:45] + r[-45:])
         #self.ranges = msg.ranges[0]
+        
+
         self.ranges = msg.ranges
 
 
