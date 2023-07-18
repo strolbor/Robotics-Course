@@ -1,0 +1,64 @@
+if(letzterEintrag>=3):
+
+            # Letzte Position vom Roboter Vektor
+            #                               x                                   x                           y                           y
+            vecA=np.array([-(self.lastpos[letzterEintrag][0]-self.lastpos[letzterEintrag-1][0]), -(self.lastpos[letzterEintrag][1]-self.lastpos[letzterEintrag-1][1])])                        
+            
+            
+
+            # Roboter zum Ziel Vektor
+            #                                  x            x                                 y             y
+            vecB=np.array([-(self.lastpos[letzterEintrag][0]-self.goal[0]), -(self.lastpos[letzterEintrag][1]-self.goal[1])])
+           
+            # Winkel zum Ziel
+            tmp = np.dot(vecA,vecB)/(np.linalg.norm(vecA)*np.linalg.norm(vecB)) # sKALARPORDUKT
+            alpha = np.arccos(tmp)
+            
+            # seöfh.heading @ (self.goal - position) / linealg.norm()
+            
+            # Winkel Roboter
+            #
+            #tmpA = self.lastpos[letzterEintrag][0]-self.lastpos[letzterEintrag-1][0]
+            tmpA = vecA[0]
+            #tmpB = self.lastpos[letzterEintrag][1]-self.lastpos[letzterEintrag-1][1]
+            tmpB = vecA[1]
+            tmpC = sqrt(tmpA**2+tmpB**2)
+            preacos = (tmpB**2+tmpC**2-tmpA**2)/(2*tmpB*tmpC)
+            beta = acos(preacos)
+            
+
+            laenge_ziel = np.linalg.norm(vecB)
+
+            ## Logging
+            if self.lastalpha != alpha:
+                if self.logger == 1:
+                    self.get_logger().info(f"Zum Ziel Winkel: {alpha}")
+                    #self.get_logger().info(f"Roboter Winkel: {beta}")
+                    self.get_logger().info(f"Laenge: {laenge_ziel}")
+                    self.get_logger().info(f"vecA: {vecA}")
+                    self.get_logger().info(f"vecB: {vecB}")
+                
+                self.lastalpha = alpha
+
+            xdis = self.forward_distance
+
+            
+            
+            if xdis < 0.3:
+                ex = -0.2
+            else:
+                ex = 0.1
+                ez = -0.1 * alpha
+                #if alpha > 0 and alpha <= 0.3:
+                    # wir sind richtig
+                    
+                #    ez = 0.0
+                #elif alpha < 0:
+                 #   ez = 0.1 * alpha
+                    #if self.lastpos[letzterEintrag][2] >= self.lastpos[letzterEintrag][2]:
+                    #    ez +=0.4
+                #else:
+                    ##ez = 0.1 * alpha
+                    #if self.lastpos[letzterEintrag][2] >= self.lastpos[letzterEintrag][2]:
+                    #    ez +=-0.4
+                # 

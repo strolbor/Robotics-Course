@@ -4,7 +4,8 @@ from rclpy.node import Node
 
 from driving_swarm_messages.msg import Range
 from geometry_msgs.msg import PointStamped
-
+import numpy as np
+from math import sqrt
 
 class LocatorNode(Node):
 
@@ -34,24 +35,89 @@ class LocatorNode(Node):
     
     def calculate_position(self):
         if not len(self.anchor_ranges):
-            self.get_logger().info("0-Rückgabe")
             return 0.0, 0.0, 0.0
+
+        # Nachricht von Basti, wie wir die Werte angeben
+        # ABER wollte nicht so wie ich
+
+        # msg.range # float  -> self.anchor_ranges[0].range
+        # msg.anchor # point 3d ->  self.anchor_ranges[0].anchor
+        # msg.anchor.x #float ->  self.anchor_ranges[0].anchor.x
+        # msg.anchor.y #float
+        # msg.anchor.z #float
         
-        # Extrahiere die Entfernungen der Ankerpunkte aus den empfangenen Nachrichten
-        anchor_distances = [msg.range for msg in self.anchor_ranges]
-        
-        # Triangulationsalgorithmus zur Positionsschätzung
-        # Hier ein einfaches Beispiel für eine 2D-Positionsschätzung mit 4 Ankerpunkten:
-        # Annahme: Ankerpunkte befinden sich auf den Koordinaten (0, 0), (1, 0), (0, 1), (1, 1)
-        
-        # Berechne die Durchschnittsentfernung zu den Ankerpunkten
-        mean_distance = np.mean(anchor_distances)
-        
-        # Berechne die Schätzung der x- und y-Koordinate des Roboters
-        x = np.sqrt(mean_distance**2 / 2)  # Beispiel für x-Koordinate
-        y = np.sqrt(mean_distance**2 / 2)  # Beispiel für y-Koordinate
-        self.get_logger().info(f'Locator: {x} {y}')
-        return x, y, 0.0  # Z-Koordinate ist hier 0, da es sich um eine 2D-Position handelt
+
+        # Korrekte Syntax herausfinden, um unsere Funktion zu füttern
+        #i =0
+        #for r in self.anchor_ranges:
+        #    self.get_logger().info(f"Test {i}: {r.range} @ {r.anchor}")
+        #    i += 1
+
+        # YOUR CODE GOES HERE:
+        # Urs
+        if len(self.anchor_ranges) >= 4:
+            ## Point 1
+            P1 = [self.anchor_ranges[0].anchor.x,self.anchor_ranges[0].anchor.y,self.anchor_ranges[0].anchor.z]
+            r1 = self.anchor_ranges[0].range
+
+            ## Point 2
+            P2 = [self.anchor_ranges[1].anchor.x,self.anchor_ranges[1].anchor.y,self.anchor_ranges[1].anchor.z]
+            r2 = self.anchor_ranges[1].range
+
+            ## Point 3
+            P3 = [self.anchor_ranges[2].anchor.x,self.anchor_ranges[2].anchor.y,self.anchor_ranges[2].anchor.z]
+            r3 = self.anchor_ranges[2].range
+
+            ## Point 4
+            P4 = [self.anchor_ranges[3].anchor.x,self.anchor_ranges[3].anchor.y,self.anchor_ranges[3].anchor.z]
+            r4 = self.anchor_ranges[3].range
+
+            x,y,z = self.trilateration(P1,P2,P3,P4,r1,r2,r3,r4)
+
+            #self.get_logger().info(f"Test Position: ({x} {y} {z})")
+            return x,y,z
+        else:
+            return 0.0, 0.0, 0.0
+
+
+    # Tom hat es gemacht
+    def trilateration(self, P1, P2, P3, P4, r1, r2, r3, r4):
+        p1 = np.array([0, 0, 0])
+        p2 = np.array([P2[0] - P1[0], P2[1] - P1[1], P2[2] - P1[2]])
+        p3 = np.array([P3[0] - P1[0], P3[1] - P1[1], P3[2] - P1[2]])
+        v1 = p2 - p1 # was ist hier der Fehler
+        v2 = p3 - p1
+
+        Xn = (v1) / np.linalg.norm(v1)
+
+        tmp = np.cross(v1, v2)
+
+        Zn = (tmp) / np.linalg.norm(tmp)
+
+        Yn = np.cross(Xn, Zn)
+
+        i = np.dot(Xn, v2)
+        d = np.dot(Xn, v1)
+        j = np.dot(Yn, v2)
+
+        X = ((r1 ** 2) - (r2 ** 2) + (d ** 2)) / (2 * d)
+        Y = (((r1 ** 2) - (r3 ** 2) + (i ** 2) + (j ** 2)) / (2 * j)) - ((i / j) * (X))
+        Z1 = np.sqrt(max(0, r1 ** 2 - X ** 2 - Y ** 2))
+        Z2 = -Z1
+
+        K1 = P1 + X * Xn + Y * Yn + Z1 * Zn
+        K2 = P1 + X * Xn + Y * Yn + Z2 * Zn
+
+        d1 = sqrt( (P4[0] - K1[0])**2 + (P4[1] - K1[1])**2 + (P4[2] - K1[2])**2 )
+        d2 = sqrt( (P4[0] - K2[0])**2 + (P4[1] - K2[1])**2 + (P4[2] - K2[2])**2 )
+
+        K1, K2 = [round(i, 5) for i in K1], [round(i, 5) for i in K2]
+
+        if abs(d1 - r4) < abs(d2 - r4):
+            return K1
+        else:
+            return K2
+
 
 
 def main(args=None):
